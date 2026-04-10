@@ -125,7 +125,7 @@ function mapDetailToMovie(item: TMDBMovieDetail, mediaType: "movie" | "tv"): Mov
 // ── Public API ──
 
 export async function getTrending(): Promise<Movie[]> {
-  const data = await fetchTMDB<{ results: TMDBMovie[] }>("/trending/all/week");
+  const data = await fetchTMDB<{ results: TMDBMovie[] }>("/trending/movie/day");
   return data.results.slice(0, 12).map((m) => {
     const type = m.media_type === "tv" ? "series" : "movie";
     return mapToMovie(m, type);

@@ -20,11 +20,11 @@ const MovieCard = ({ movie, index = 0 }: MovieCardProps) => {
         className="group block relative w-[160px] sm:w-[180px] md:w-[200px] shrink-0"
       >
         {/* Poster */}
-        <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-muted">
+        <div className="group relative aspect-[2/3] rounded-lg overflow-hidden bg-muted transition-transform duration-300 hover:scale-105">
           <img
             src={movie.poster}
             alt={movie.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
 
