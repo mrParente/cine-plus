@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
 import { Play, ArrowLeft, Star, Clock, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContentCarousel from "@/components/ContentCarousel";
+import FakePlayer from "@/components/FakePlayer";
 import { useMovieDetails, useRecommendations } from "@/hooks/useTMDB";
 
 const Details = () => {
@@ -11,6 +13,7 @@ const Details = () => {
   const mt = (mediaType === "tv" ? "tv" : "movie") as "movie" | "tv";
   const { data: movie, isLoading } = useMovieDetails(Number(id), mt);
   const { data: recommended = [] } = useRecommendations(Number(id), mt);
+  const [showPlayer, setShowPlayer] = useState(false);
 
   if (isLoading) {
     return (
@@ -109,7 +112,10 @@ const Details = () => {
             </p>
 
             <div className="flex gap-3 pt-2">
-              <button className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-semibold transition-all hover:scale-105">
+              <button
+                onClick={() => setShowPlayer(true)}
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg font-semibold transition-all hover:scale-105"
+              >
                 <Play size={18} fill="currentColor" />
                 Assistir Agora
               </button>
@@ -122,6 +128,10 @@ const Details = () => {
         <div className="mt-16">
           <ContentCarousel title="Você também pode gostar" movies={recommended} />
         </div>
+      )}
+
+      {showPlayer && movie && (
+        <FakePlayer movie={movie} onClose={() => setShowPlayer(false)} />
       )}
 
       <Footer />
