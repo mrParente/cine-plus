@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Volume2, X, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, Volume2, X, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 
 interface FakePlayerProps {
   movie: {
@@ -16,9 +16,58 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
   const [showControls, setShowControls] = useState(true);
   const [showCenterControls, setShowCenterControls] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isPortrait, setIsPortrait] = useState(false);
   const totalDuration = 8130; // 2h 15min 30s em segundos (fake)
   const progressRef = useRef<number>();
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Funções para fullscreen
+  const enterFullscreen = async () => {
+    if (document.documentElement.requestFullscreen) {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch (error) {
+        console.warn('Fullscreen não suportado ou falhou:', error);
+      }
+    }
+  };
+
+  const exitFullscreen = async () => {
+    if (document.exitFullscreen && document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch (error) {
+        console.warn('Erro ao sair do fullscreen:', error);
+      }
+    }
+  };
+
+  // Funções para orientação
+  const lockLandscape = async () => {
+    if (screen.orientation && screen.orientation.lock) {
+      try {
+        await screen.orientation.lock('landscape');
+      } catch (error) {
+        console.warn('Não foi possível bloquear orientação landscape:', error);
+      }
+    }
+  };
+
+  const unlockOrientation = async () => {
+    if (screen.orientation && screen.orientation.unlock) {
+      try {
+        await screen.orientation.unlock();
+      } catch (error) {
+        console.warn('Erro ao desbloquear orientação:', error);
+      }
+    }
+  };
+
+  // Detectar orientação
+  const checkOrientation = () => {
+    const portrait = window.innerHeight > window.innerWidth;
+    setIsPortrait(portrait);
+  };
 
   // Buffering inicial
   useEffect(() => {
@@ -107,6 +156,31 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Fullscreen e orientação ao montar
+  useEffect(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      enterFullscreen();
+      lockLandscape();
+    }
+
+    // Detectar mudanças de orientação
+    const handleOrientationChange = () => {
+      checkOrientation();
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
+    checkOrientation(); // Checar inicial
+
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
+      unlockOrientation();
+      exitFullscreen();
+    };
+  }, []);
+
   const togglePlayPause = () => {
     setIsPlaying(!isPlaying);
   };
@@ -170,6 +244,17 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
       </div>
+
+      {/* Overlay para orientação portrait */}
+      {isPortrait && (
+        <div className="absolute inset-0 bg-black z-60 flex items-center justify-center">
+          <div className="text-center space-y-4 px-6">
+            <RotateCcw size={64} className="text-white mx-auto animate-pulse" />
+            <h2 className="text-white text-2xl font-bold">Gire o dispositivo</h2>
+            <p className="text-white/80 text-lg">Para uma melhor experiência de visualização</p>
+          </div>
+        </div>
+      )}
 
       {/* Título no topo */}
       <div className="absolute top-4 left-4 z-10">
