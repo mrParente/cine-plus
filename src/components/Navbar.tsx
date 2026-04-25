@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Search, Menu, X, User } from "lucide-react";
+import { Search, Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "Início", path: "/" },
@@ -19,6 +20,8 @@ const Navbar = ({ onSearch }: NavbarProps) => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -89,9 +92,62 @@ const Navbar = ({ onSearch }: NavbarProps) => {
               <Search size={20} />
             </button>
 
-            {/* Avatar */}
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
-              <User size={16} className="text-primary-foreground" />
+            {/* Avatar / Perfil */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((prev) => !prev)}
+                className="w-8 h-8 rounded-full bg-primary flex items-center justify-center hover:ring-2 hover:ring-primary/50 transition-all"
+              >
+                <User size={16} className="text-primary-foreground" />
+              </button>
+
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 mt-2 w-52 rounded-2xl border border-border bg-background p-3 shadow-xl"
+                  >
+                    {user ? (
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          to="/perfil"
+                          onClick={() => setProfileOpen(false)}
+                          className="block rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary"
+                        >
+                          Ver perfil
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            logout();
+                            setProfileOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                        >
+                          <LogOut size={16} />
+                          Sair
+                        </button>
+                      </div>
+                    ) : (
+                      <Link
+                        to="/perfil"
+                        onClick={() => setProfileOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-foreground hover:bg-secondary"
+                      >
+                        Entrar / Cadastrar
+                      </Link>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Mobile menu toggle */}
@@ -129,6 +185,17 @@ const Navbar = ({ onSearch }: NavbarProps) => {
                   {item.label}
                 </Link>
               ))}
+              <Link
+                to="/perfil"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block text-sm font-medium py-2 transition-colors ${
+                  location.pathname === "/perfil"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Perfil
+              </Link>
             </div>
           </motion.div>
         )}

@@ -18,7 +18,7 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPortrait, setIsPortrait] = useState(false);
   const totalDuration = 8130; // 2h 15min 30s em segundos (fake)
-  const progressRef = useRef<number>();
+  const progressRef = useRef<number | undefined>();
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Funções para fullscreen
@@ -81,7 +81,7 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
   // Progresso automático
   useEffect(() => {
     if (isPlaying && !isBuffering) {
-      progressRef.current = setInterval(() => {
+      progressRef.current = window.setInterval(() => {
         setProgress((prev) => {
           const newProgress = prev + 0.1;
           if (newProgress >= 100) {
@@ -94,12 +94,12 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
       }, 100);
     } else {
       if (progressRef.current) {
-        clearInterval(progressRef.current);
+        window.clearInterval(progressRef.current);
       }
     }
     return () => {
       if (progressRef.current) {
-        clearInterval(progressRef.current);
+        window.clearInterval(progressRef.current);
       }
     };
   }, [isPlaying, isBuffering]);

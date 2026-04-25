@@ -7,7 +7,9 @@ import { Analytics } from '@vercel/analytics/react';
 import Index from "./pages/Index.tsx";
 import Details from "./pages/Details.tsx";
 import Category from "./pages/Category.tsx";
+import Perfil from "./pages/Perfil.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider } from "./hooks/useAuth.tsx";
 
 const queryClient = new QueryClient();
 
@@ -16,14 +18,17 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/detalhes/:mediaType/:id" element={<Details />} />
-          <Route path="/:category" element={<Category />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/detalhes/:mediaType/:id" element={<Details />} />
+            <Route path="/:category" element={<Category />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
       <Analytics />
     </TooltipProvider>
   </QueryClientProvider>
