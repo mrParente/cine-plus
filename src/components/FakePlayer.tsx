@@ -261,6 +261,16 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
         <h1 className="text-white text-xl font-bold">{movie.title}</h1>
       </div>
 
+      {/* Botão de fechar sempre visível */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-30 rounded-full bg-black/40 p-2 text-white/80 hover:text-white hover:bg-black/60 transition-colors"
+        aria-label="Fechar player"
+      >
+        <X size={24} />
+      </button>
+
       {/* Controles Centrais */}
       <div
         className={`absolute inset-0 flex items-center justify-center z-20 transition-opacity duration-300 ${
@@ -269,6 +279,7 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
       >
         <div className="flex items-center gap-8">
           <button
+            type="button"
             onClick={skipBackward}
             className="text-white hover:text-primary transition-all duration-200 hover:scale-110 drop-shadow-lg"
             title="Voltar 10 segundos"
@@ -276,12 +287,14 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
             <SkipBack size={32} />
           </button>
           <button
+            type="button"
             onClick={togglePlayPause}
             className="text-white hover:text-primary transition-all duration-200 hover:scale-110 bg-white/10 rounded-full p-4 hover:bg-white/20 drop-shadow-lg"
           >
             {isPlaying ? <Pause size={48} /> : <Play size={48} fill="currentColor" />}
           </button>
           <button
+            type="button"
             onClick={skipForward}
             className="text-white hover:text-primary transition-all duration-200 hover:scale-110 drop-shadow-lg"
             title="Avançar 10 segundos"
@@ -313,6 +326,7 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
+              type="button"
               onClick={skipBackward}
               className="text-white/70 hover:text-white transition-colors"
               title="Voltar 10 segundos"
@@ -320,31 +334,28 @@ const FakePlayer: React.FC<FakePlayerProps> = ({ movie, onClose }) => {
               <SkipBack size={16} />
             </button>
             <button
+              type="button"
               onClick={togglePlayPause}
               className="text-white/70 hover:text-white transition-colors"
             >
               {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
             <button
+              type="button"
               onClick={skipForward}
               className="text-white/70 hover:text-white transition-colors"
               title="Avançar 10 segundos"
             >
               <SkipForward size={16} />
             </button>
-            <button className="text-white/70 hover:text-white transition-colors">
+            <button type="button" className="text-white/70 hover:text-white transition-colors">
               <Volume2 size={16} />
             </button>
             <span className="text-white/70 text-sm">
               {formatTime(currentTime)} / {formatTime(totalDuration)}
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white/70 hover:text-white transition-colors"
-          >
-            <X size={20} />
-          </button>
+
         </div>
       </div>
     </div>
