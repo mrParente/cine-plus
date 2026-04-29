@@ -11,14 +11,49 @@ import { useMovieDetails, useRecommendations } from "@/hooks/useTMDB";
 const Details = () => {
   const { id, mediaType } = useParams<{ id: string; mediaType: string }>();
   const mt = (mediaType === "tv" ? "tv" : "movie") as "movie" | "tv";
-  const { data: movie, isLoading } = useMovieDetails(Number(id), mt);
-  const { data: recommended = [] } = useRecommendations(Number(id), mt);
+  const idParam = id ? Number(id) : NaN;
+  const validId = Number.isInteger(idParam) && idParam > 0 ? idParam : undefined;
+
+  console.debug("[Details] route params:", { id, mediaType, validId, mt });
+
+  const {
+    data: movie,
+    isLoading,
+    error,
+  } = useMovieDetails(validId, mt);
+  const { data: recommended = [] } = useRecommendations(validId, mt);
   const [showPlayer, setShowPlayer] = useState(false);
+
+  if (!validId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-2xl font-bold text-foreground">ID inválido ou faltando.</p>
+          <p className="text-sm text-muted-foreground">
+            Verifique se o link de detalhes está correto e tente novamente.
+          </p>
+          <Link to="/" className="text-primary hover:underline">Voltar ao início</Link>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-4">
+          <p className="text-2xl font-bold text-foreground">Erro ao carregar detalhes</p>
+          <p className="text-sm text-muted-foreground">{(error as Error)?.message || "Ocorreu um problema inesperado."}</p>
+          <Link to="/" className="text-primary hover:underline">Voltar ao início</Link>
+        </div>
       </div>
     );
   }

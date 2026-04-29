@@ -63,6 +63,7 @@ async function fetchTMDB<T>(endpoint: string, params: Record<string, string> = {
   url.searchParams.set("language", "pt-BR");
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
+  console.debug("[TMDB] fetch url:", url.toString());
   const res = await fetch(url.toString(), { headers });
   if (!res.ok) throw new Error(`TMDB error: ${res.status}`);
   return res.json();
@@ -158,14 +159,32 @@ export async function getNowPlaying(): Promise<Movie[]> {
 }
 
 export async function getMovieDetails(id: number, mediaType: "movie" | "tv"): Promise<Movie> {
-  const data = await fetchTMDB<TMDBMovieDetail>(`/${mediaType}/${id}`);
-  return mapDetailToMovie(data, mediaType);
+  const endpoint = `/${mediaType}/${id}`;
+  const debugUrl = `${BASE_URL}${endpoint}?language=pt-BR`;
+  console.debug("[TMDB] getMovieDetails", { id, mediaType, debugUrl });
+
+  try {
+    const data = await fetchTMDB<TMDBMovieDetail>(endpoint);
+    return mapDetailToMovie(data, mediaType);
+  } catch (error) {
+    console.error("[TMDB] getMovieDetails failed", { id, mediaType, endpoint, error });
+    throw error;
+  }
 }
 
 export async function getRecommendations(id: number, mediaType: "movie" | "tv"): Promise<Movie[]> {
-  const data = await fetchTMDB<{ results: TMDBMovie[] }>(`/${mediaType}/${id}/recommendations`);
-  const type = mediaType === "tv" ? "series" : "movie";
-  return data.results.slice(0, 12).map((m) => mapToMovie(m, type));
+  const endpoint = `/${mediaType}/${id}/recommendations`;
+  const debugUrl = `${BASE_URL}${endpoint}?language=pt-BR`;
+  console.debug("[TMDB] getRecommendations", { id, mediaType, debugUrl });
+
+  try {
+    const data = await fetchTMDB<{ results: TMDBMovie[] }>(endpoint);
+    const type = mediaType === "tv" ? "series" : "movie";
+    return data.results.slice(0, 12).map((m) => mapToMovie(m, type));
+  } catch (error) {
+    console.error("[TMDB] getRecommendations failed", { id, mediaType, endpoint, error });
+    throw error;
+  }
 }
 
 export async function searchContent(query: string): Promise<Movie[]> {

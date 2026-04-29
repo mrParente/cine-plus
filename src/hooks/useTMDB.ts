@@ -30,18 +30,18 @@ export const useDocumentaries = () =>
 export const useNowPlaying = () =>
   useQuery({ queryKey: ["now-playing"], queryFn: getNowPlaying, staleTime: 1000 * 60 * 10 });
 
-export const useMovieDetails = (id: number, mediaType: "movie" | "tv") =>
+export const useMovieDetails = (id?: number, mediaType: "movie" | "tv") =>
   useQuery({
     queryKey: ["details", mediaType, id],
-    queryFn: () => getMovieDetails(id, mediaType),
-    enabled: !!id,
+    queryFn: () => getMovieDetails(id ?? 0, mediaType),
+    enabled: typeof id === "number" && !Number.isNaN(id) && id > 0,
   });
 
-export const useRecommendations = (id: number, mediaType: "movie" | "tv") =>
+export const useRecommendations = (id?: number, mediaType: "movie" | "tv") =>
   useQuery({
     queryKey: ["recommendations", mediaType, id],
-    queryFn: () => getRecommendations(id, mediaType),
-    enabled: !!id,
+    queryFn: () => getRecommendations(id ?? 0, mediaType),
+    enabled: typeof id === "number" && !Number.isNaN(id) && id > 0,
   });
 
 export const useSearch = (query: string) =>
