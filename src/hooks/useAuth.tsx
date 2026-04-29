@@ -120,7 +120,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const profile = createUserProfile(name, email);
     setUser(profile);
     saveStoredUser(profile);
-    return { success: true, message: "Cadastro realizado com sucesso." };
+
+    const firstName = name.split(' ')[0];
+    return { success: true, message: `Olá, ${firstName}! Seu cadastro foi realizado com sucesso.` };
   };
 
   const logout = () => {

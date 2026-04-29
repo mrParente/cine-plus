@@ -92,6 +92,13 @@ const Navbar = ({ onSearch }: NavbarProps) => {
               <Search size={20} />
             </button>
 
+            {/* Welcome message for logged users */}
+            {user && (
+              <div className="hidden sm:block text-sm text-muted-foreground">
+                Olá, <span className="font-medium text-foreground">{user.name.split(' ')[0]}</span>
+              </div>
+            )}
+
             {/* Avatar / Perfil */}
             <div className="relative">
               <button
@@ -171,6 +178,11 @@ const Navbar = ({ onSearch }: NavbarProps) => {
             className="md:hidden bg-background/95 backdrop-blur-md border-t border-border"
           >
             <div className="px-4 py-4 space-y-3">
+              {user && (
+                <div className="text-sm text-muted-foreground border-b border-border pb-3 mb-3">
+                  Olá, <span className="font-medium text-foreground">{user.name.split(' ')[0]}</span>
+                </div>
+              )}
               {navItems.map((item) => (
                 <Link
                   key={item.path}
