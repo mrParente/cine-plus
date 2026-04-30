@@ -46,14 +46,12 @@ const Perfil = () => {
       <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 mx-auto max-w-6xl">
         <div className="space-y-6">
           <section className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl font-semibold text-foreground">Perfil do usuário</h1>
-              </div>
+            <div className="mb-6 text-center">
+              <h1 className="text-3xl font-semibold text-foreground">Perfil do usuário</h1>
             </div>
 
             {user ? (
-              <div className="space-y-6">
+              <div className="space-y-6 text-center">
                 <div className="rounded-2xl border border-border bg-background/80 p-6">
                   <h2 className="text-xl font-semibold text-foreground">Bem-vindo, {user.name}!</h2>
                   <p className="mt-2 text-sm text-muted-foreground">E-mail: {user.email}</p>
@@ -75,7 +73,7 @@ const Perfil = () => {
                   <p className="mt-2 text-sm text-muted-foreground">
                     Crie uma conta rápida e continue explorando filmes e séries sem precisar de armazenamento permanente.
                   </p>
-                  <div className="mt-6 flex flex-wrap items-center gap-2">
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
                     <Button
                       variant={mode === "login" ? "default" : "secondary"}
                       size="sm"
@@ -92,9 +90,9 @@ const Perfil = () => {
                     </Button>
                   </div>
                 </aside>
-                <form onSubmit={handleAuth} className="space-y-5 rounded-2xl border border-border bg-background/80 p-6">
+                <form onSubmit={handleAuth} className="mx-auto max-w-xl space-y-5 rounded-2xl border border-border bg-background/80 p-6 text-center">
                   {mode === "register" && (
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-left">
                       <Label htmlFor="name">Nome</Label>
                       <Input
                         id="name"
@@ -114,7 +112,7 @@ const Perfil = () => {
                       placeholder="seu@email.com"
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-left">
                     <Label htmlFor="password">Senha</Label>
                     <Input
                       id="password"
@@ -124,9 +122,9 @@ const Perfil = () => {
                       placeholder="Digite sua senha"
                     />
                   </div>
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                     <Button type="submit">{mode === "login" ? "Entrar" : "Cadastrar"}</Button>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground max-w-md">
                       Seus dados ficam disponíveis apenas nesta sessão e expiram automaticamente.
                     </p>
                   </div>

@@ -5,6 +5,7 @@ import HeroBanner from "@/components/HeroBanner";
 import ContentCarousel from "@/components/ContentCarousel";
 import Footer from "@/components/Footer";
 import { useTrending, usePopularMovies, useNowPlaying, usePopularSeries, useDocumentaries, useSearch } from "@/hooks/useTMDB";
+import { isSearchQueryValid, normalizeSearchQuery } from "@/lib/tmdb";
 import type { Movie } from "@/lib/tmdb";
 
 const Index = () => {
@@ -15,7 +16,9 @@ const Index = () => {
   const { data: nowPlaying = [] } = useNowPlaying();
   const { data: series = [] } = usePopularSeries();
   const { data: docs = [] } = useDocumentaries();
-  const { data: searchResults } = useSearch(searchQuery);
+  const searchTerm = searchQuery.trim();
+  const searchQueryIsValid = isSearchQueryValid(searchTerm);
+  const { data: searchResults } = useSearch(searchTerm);
 
   const heroMovie = trending[0];
 
@@ -23,31 +26,41 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar onSearch={setSearchQuery} />
 
-      {searchQuery.length >= 2 && searchResults ? (
+      {searchQuery.length >= 2 ? (
         <div className="pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold text-foreground mb-6">
-            Resultados para "{searchQuery}"
+            Resultados para "{normalizeSearchQuery(searchTerm)}"
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {searchResults.map((movie) => (
-              <div key={movie.id}>
-                <Link to={`/detalhes/${movie.mediaType}/${movie.id}`} className="group block">
-                  <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={movie.poster}
-                      alt={movie.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      loading="lazy"
-                    />
-                  </div>
-                  <p className="mt-2 text-sm text-foreground line-clamp-1">{movie.title}</p>
-                </Link>
-              </div>
-            ))}
-            {searchResults.length === 0 && (
-              <p className="col-span-full text-muted-foreground">Nenhum resultado encontrado.</p>
-            )}
-          </div>
+
+          {!searchQueryIsValid ? (
+            <div className="rounded-3xl border border-border bg-card p-6 text-center">
+              <p className="text-lg font-semibold text-foreground">Pesquisa inválida</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Use palavras ou termos reais. Caracteres perigosos foram removidos automaticamente.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {searchResults?.map((movie) => (
+                <div key={movie.id}>
+                  <Link to={`/detalhes/${movie.mediaType}/${movie.id}`} className="group block">
+                    <div className="aspect-[2/3] rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={movie.poster}
+                        alt={movie.title}
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform"
+                        loading="lazy"
+                      />
+                    </div>
+                    <p className="mt-2 text-sm text-foreground line-clamp-1">{movie.title}</p>
+                  </Link>
+                </div>
+              ))}
+              {searchResults && searchResults.length === 0 && (
+                <p className="col-span-full text-muted-foreground">Nenhum resultado encontrado.</p>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <>

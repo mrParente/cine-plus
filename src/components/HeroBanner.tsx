@@ -41,7 +41,7 @@ const HeroBanner = ({ movie }: HeroBannerProps) => {
             <span>{movie.genres.join(" • ")}</span>
           </div>
 
-          <p className="text-muted-foreground text-base leading-relaxed line-clamp-3">
+          <p className="text-muted-foreground text-base leading-relaxed max-w-2xl text-left line-clamp-3">
             {movie.overview}
           </p>
 

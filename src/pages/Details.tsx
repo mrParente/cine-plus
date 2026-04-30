@@ -142,7 +142,7 @@ const Details = () => {
               ))}
             </div>
 
-            <p className="text-muted-foreground leading-relaxed max-w-2xl">
+            <p className="text-muted-foreground leading-relaxed max-w-3xl text-left">
               {movie.overview}
             </p>
 

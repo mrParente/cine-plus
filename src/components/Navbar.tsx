@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Search, Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,12 +17,13 @@ interface NavbarProps {
 
 const Navbar = ({ onSearch }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -30,9 +31,46 @@ const Navbar = ({ onSearch }: NavbarProps) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!searchRef.current?.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsSearchOpen(false);
+    setProfileOpen(false);
+  }, [location.pathname]);
+
   const handleSearch = (value: string) => {
     setSearchQuery(value);
+    setIsMenuOpen(false);
     onSearch?.(value);
+  };
+
+  const toggleSearch = () => {
+    setIsSearchOpen((prev) => {
+      const next = !prev;
+      if (next) setIsMenuOpen(false);
+      return next;
+    });
+  };
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => {
+      const next = !prev;
+      if (next) setIsSearchOpen(false);
+      setProfileOpen(false);
+      return next;
+    });
   };
 
   return (
@@ -69,28 +107,31 @@ const Navbar = ({ onSearch }: NavbarProps) => {
           {/* Right section */}
           <div className="flex items-center gap-3">
             {/* Search */}
-            <AnimatePresence>
-              {searchOpen && (
-                <motion.input
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 200, opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  type="text"
-                  placeholder="Buscar..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="bg-secondary text-foreground text-sm px-3 py-1.5 rounded-md outline-none border border-border focus:border-primary"
-                  autoFocus
-                />
-              )}
-            </AnimatePresence>
-            <button
-              onClick={() => setSearchOpen(!searchOpen)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Search size={20} />
-            </button>
+            <div ref={searchRef} className="flex items-center gap-2">
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.input
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: "100%", opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    type="text"
+                    placeholder="Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    onFocus={() => setIsMenuOpen(false)}
+                    className="bg-secondary text-foreground text-sm px-3 py-2 rounded-md outline-none border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 w-full max-w-[280px] transition-all"
+                    autoFocus
+                  />
+                )}
+              </AnimatePresence>
+              <button
+                onClick={toggleSearch}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Search size={20} />
+              </button>
+            </div>
 
             {/* Welcome message for logged users */}
             {user && (
@@ -160,9 +201,10 @@ const Navbar = ({ onSearch }: NavbarProps) => {
             {/* Mobile menu toggle */}
             <button
               className="md:hidden text-muted-foreground hover:text-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={toggleMenu}
+              aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
@@ -170,14 +212,24 @@ const Navbar = ({ onSearch }: NavbarProps) => {
 
       {/* Mobile menu */}
       <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-background/95 backdrop-blur-md border-t border-border"
-          >
-            <div className="px-4 py-4 space-y-3">
+        {isMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/30 md:hidden"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25 }}
+              className="fixed inset-x-0 top-16 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border shadow-2xl"
+            >
+              <div className="px-4 py-4 space-y-3">
               {user && (
                 <div className="text-sm text-muted-foreground border-b border-border pb-3 mb-3">
                   Olá, <span className="font-medium text-foreground">{user.name.split(' ')[0]}</span>
@@ -187,7 +239,7 @@ const Navbar = ({ onSearch }: NavbarProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setIsMenuOpen(false)}
                   className={`block text-sm font-medium py-2 transition-colors ${
                     location.pathname === item.path
                       ? "text-primary"
@@ -199,7 +251,7 @@ const Navbar = ({ onSearch }: NavbarProps) => {
               ))}
               <Link
                 to="/perfil"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
                 className={`block text-sm font-medium py-2 transition-colors ${
                   location.pathname === "/perfil"
                     ? "text-primary"
@@ -210,7 +262,8 @@ const Navbar = ({ onSearch }: NavbarProps) => {
               </Link>
             </div>
           </motion.div>
-        )}
+        </>
+      )}
       </AnimatePresence>
     </nav>
   );

@@ -10,6 +10,7 @@ import {
   getRecommendations,
   searchContent,
   discoverByType,
+  isSearchQueryValid,
 } from "@/lib/tmdb";
 
 export const useTrending = () =>
@@ -44,13 +45,15 @@ export const useRecommendations = (id?: number, mediaType: "movie" | "tv") =>
     enabled: typeof id === "number" && !Number.isNaN(id) && id > 0,
   });
 
-export const useSearch = (query: string) =>
-  useQuery({
+export const useSearch = (query: string) => {
+  const validQuery = isSearchQueryValid(query);
+  return useQuery({
     queryKey: ["search", query],
     queryFn: () => searchContent(query),
-    enabled: query.length >= 2,
+    enabled: validQuery,
     staleTime: 1000 * 60 * 5,
   });
+};
 
 export const useDiscover = (type: "movie" | "series" | "documentary") =>
   useQuery({

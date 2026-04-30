@@ -9,9 +9,7 @@ const Footer = () => (
       </div>
       <p>© {new Date().getFullYear()} Cine Plus. Todos os direitos reservados.</p>
       <div className="flex gap-4">
-        <span className="hover:text-foreground cursor-pointer transition-colors">Termos</span>
-        <span className="hover:text-foreground cursor-pointer transition-colors">Privacidade</span>
-        <span className="hover:text-foreground cursor-pointer transition-colors">Contato</span>
+        <span className="hover:text-foreground cursor-pointer transition-colors">Siga o Cine Plus</span>
         <a href="https://www.instagram.com/ciineplus_?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
           <Instagram className="w-5 h-5 hover:text-foreground cursor-pointer transition-colors" />
         </a>

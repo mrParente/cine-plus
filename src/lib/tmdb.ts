@@ -61,7 +61,18 @@ const headers = {
 async function fetchTMDB<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
   const url = new URL(`${BASE_URL}${endpoint}`);
   url.searchParams.set("language", "pt-BR");
-  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+  Object.entries(params).forEach(([k, v]) => {
+    if (k === "query") {
+      url.search += `${url.search ? "&" : ""}${k}=${encodeURIComponent(v)}`;
+      return;
+    }
+    url.searchParams.set(k, v);
+  });
+
+  if (endpoint.startsWith("/search") || endpoint.startsWith("/discover")) {
+    url.searchParams.set("include_adult", "false");
+  }
 
   console.debug("[TMDB] fetch url:", url.toString());
   const res = await fetch(url.toString(), { headers });
@@ -80,6 +91,21 @@ const GENRE_MAP: Record<number, string> = {
   10764: "Reality", 10765: "Sci-Fi & Fantasia", 10766: "Novela",
   10767: "Talk", 10768: "Guerra & Política",
 };
+
+export function normalizeSearchQuery(query: string) {
+  return query
+    .trim()
+    .replace(/['";=<>]/g, "")
+    .replace(/--+/g, " ")
+    .replace(/\r?\n|\r/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .slice(0, 80);
+}
+
+export function isSearchQueryValid(query: string) {
+  const normalized = normalizeSearchQuery(query);
+  return normalized.length >= 2 && /[A-Za-z0-9À-ÿ]/.test(normalized);
+}
 
 function mapToMovie(item: TMDBMovie, type: "movie" | "series" | "documentary" = "movie"): Movie {
   const isTV = !!item.name;
@@ -188,7 +214,13 @@ export async function getRecommendations(id: number, mediaType: "movie" | "tv"):
 }
 
 export async function searchContent(query: string): Promise<Movie[]> {
-  const data = await fetchTMDB<{ results: TMDBMovie[] }>("/search/multi", { query });
+  const sanitizedQuery = normalizeSearchQuery(query);
+  if (!isSearchQueryValid(sanitizedQuery)) return [];
+
+  const data = await fetchTMDB<{ results: TMDBMovie[] }>("/search/multi", {
+    query: sanitizedQuery,
+  });
+
   return data.results
     .filter((m) => m.media_type === "movie" || m.media_type === "tv")
     .slice(0, 20)
@@ -207,3 +239,4 @@ export async function discoverByType(type: "movie" | "series" | "documentary"): 
   const data = await fetchTMDB<{ results: TMDBMovie[] }>("/discover/movie", { sort_by: "popularity.desc" });
   return data.results.slice(0, 20).map((m) => mapToMovie(m, "movie"));
 }
+
